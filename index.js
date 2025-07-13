@@ -52,17 +52,22 @@ function buildEventElement(data) {
   const dayOfMonth = date.getDate()
   const time = date.toLocaleTimeString(locale, { "hour": "numeric", "minute": "2-digit" })
 
-  // Build the date container
-  const dateDiv = document.createElement("div")
+  // Build the day of month container
+  const dayOfMonthDiv = document.createElement("div")
+  const dayOfMonthHeader = document.createElement("h1")
+  dayOfMonthHeader.innerText = dayOfMonth
+  dayOfMonthDiv.append(dayOfMonthHeader)
+  dayOfMonthDiv.classList = "col-1"
+
+  // Build the month container
+  const monthDiv = document.createElement("div")
   const dayOfWeekHeader = document.createElement("h6")
   const monthHeader = document.createElement("h6")
-  const dayOfMonthHeader = document.createElement("h1")
   dayOfWeekHeader.innerText = dayOfWeek
   monthHeader.innerText = month
-  dayOfMonthHeader.innerText = dayOfMonth
-  dateDiv.append(dayOfWeekHeader)
-  dateDiv.append(monthHeader)
-  dateDiv.append(dayOfMonthHeader)
+  monthDiv.append(dayOfWeekHeader)
+  monthDiv.append(monthHeader)
+  monthDiv.classList = "col-2"
 
   // Build the location container
   const locationDiv = document.createElement("div")
@@ -72,13 +77,14 @@ function buildEventElement(data) {
   addressHeader.innerText = address
   locationDiv.append(timeHeader)
   locationDiv.append(addressHeader)
+  locationDiv.classList = "col-9"
 
   // Build the title container
   const titleDiv = document.createElement("div")
   const titleAnchor = document.createElement("a")
-  const titleHeader = document.createElement("h2")
+  const titleHeader = document.createElement("h3")
   const gamesHeader = document.createElement("h6")
-  titleAnchor.classList = "link-dark link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover"
+  titleAnchor.classList = "link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover"
   titleAnchor.href = url
   titleAnchor.target = "_blank"
   titleAnchor.innerText = title
@@ -87,11 +93,16 @@ function buildEventElement(data) {
   titleDiv.append(titleHeader)
   titleDiv.append(gamesHeader)
 
-  // Build the overarching container
+  // Build the overarching containers
+  const dateAndLocationDiv = document.createElement("div")
+  dateAndLocationDiv.append(dayOfMonthDiv)
+  dateAndLocationDiv.append(monthDiv)
+  dateAndLocationDiv.append(locationDiv)
+  dateAndLocationDiv.classList = "row"
   const containerDiv = document.createElement("div")
-  containerDiv.append(dateDiv)
-  containerDiv.append(locationDiv)
+  containerDiv.append(dateAndLocationDiv)
   containerDiv.append(titleDiv)
+  containerDiv.classList = "col mb-5"
   return containerDiv
 }
 
