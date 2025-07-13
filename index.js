@@ -1,3 +1,10 @@
+// TODO
+// 1. Improve visibility of event information
+// 2. Add mobile styling
+// 3. Add background images
+// 4. Add event removal option
+// 5. Add game, state, and country filters
+
 /**
  * Requires a given value to be defined and not set to falue or an empty string.
  * @param {Object} value - The value to be required.
