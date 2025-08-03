@@ -1,9 +1,7 @@
 // TODO
-// 1. Improve visibility of event information
-// 2. Add mobile styling
-// 3. Add background images
-// 4. Add event removal option
-// 5. Add game, state, and country filters
+// 1. Add game, state, and country filters
+// 2. Add event edit and removal options
+// 3. Add background image and/or theme selection
 
 /**
  * Requires a given value to be defined and not set to falue or an empty string.
@@ -56,7 +54,7 @@ function buildEventElement(data) {
   const date = new Date(dateString)
   const dayOfWeek = date.toLocaleDateString(locale, { "weekday": "long" }).toUpperCase()
   const month = date.toLocaleDateString(locale, { "month": "long" }).toUpperCase()
-  const dayOfMonth = date.getDate()
+  const dayOfMonth = date.getDate() < 10 ? "0" + date.getDate() : date.getDate()
   const time = date.toLocaleTimeString(locale, { "hour": "numeric", "minute": "2-digit" })
 
   // Build the day of month container
@@ -64,7 +62,7 @@ function buildEventElement(data) {
   const dayOfMonthHeader = document.createElement("h1")
   dayOfMonthHeader.innerText = dayOfMonth
   dayOfMonthDiv.append(dayOfMonthHeader)
-  dayOfMonthDiv.classList = "col-1"
+  dayOfMonthDiv.classList = "col w-auto"
 
   // Build the month container
   const monthDiv = document.createElement("div")
@@ -74,7 +72,7 @@ function buildEventElement(data) {
   monthHeader.innerText = month
   monthDiv.append(dayOfWeekHeader)
   monthDiv.append(monthHeader)
-  monthDiv.classList = "col-2"
+  monthDiv.classList = "col w-auto"
 
   // Build the location container
   const locationDiv = document.createElement("div")
@@ -84,7 +82,7 @@ function buildEventElement(data) {
   addressHeader.innerText = address
   locationDiv.append(timeHeader)
   locationDiv.append(addressHeader)
-  locationDiv.classList = "col-9"
+  locationDiv.classList = "col w-auto text-body-secondary"
 
   // Build the title container
   const titleDiv = document.createElement("div")
@@ -96,6 +94,7 @@ function buildEventElement(data) {
   titleAnchor.target = "_blank"
   titleAnchor.innerText = title
   gamesHeader.innerText = games
+  gamesHeader.classList = "text-body-secondary"
   titleHeader.append(titleAnchor)
   titleDiv.append(titleHeader)
   titleDiv.append(gamesHeader)
@@ -105,12 +104,15 @@ function buildEventElement(data) {
   dateAndLocationDiv.append(dayOfMonthDiv)
   dateAndLocationDiv.append(monthDiv)
   dateAndLocationDiv.append(locationDiv)
-  dateAndLocationDiv.classList = "row"
-  const containerDiv = document.createElement("div")
-  containerDiv.append(dateAndLocationDiv)
-  containerDiv.append(titleDiv)
-  containerDiv.classList = "col mb-5"
-  return containerDiv
+  dateAndLocationDiv.classList = "row row-cols-3"
+  const borderedDiv = document.createElement("div")
+  borderedDiv.append(dateAndLocationDiv)
+  borderedDiv.append(titleDiv)
+  borderedDiv.classList = "p-2 border rounded bg-body-secondary"
+  const eventDiv = document.createElement("div")
+  eventDiv.append(borderedDiv)
+  eventDiv.classList = "col-md-6 mb-4"
+  return eventDiv
 }
 
 /**
