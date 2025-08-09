@@ -1,10 +1,11 @@
 // TODO
-// 1. Add game, state, and country filters
-// 2. Add event edit and removal options
-// 3. Add background image and/or theme selection
+// 1. Add download button
+// 2. Add game and state filters
+// 3. Add background theme selection
+// 4. Add event edit and removal options
 
 /**
- * Requires a given value to be defined and not set to falue or an empty string.
+ * Require a given value to be defined and not set to falue or an empty string.
  * @param {Object} value - The value to be required.
  * @param {String} errorMessage - The message to throw if the condition fails.
  */
@@ -15,7 +16,7 @@ function requireValue(value, errorMessage) {
 }
 
 /**
- * Fetches a JSON object from a URL GET response.
+ * Fetch a JSON object from a URL GET response.
  * @param {String} url - The request URL.
  * @returns {Object} Returns the JSON object.
  */
@@ -30,12 +31,25 @@ async function fetchJson(url) {
 }
 
 /**
- * Creates a div element containing event data.
+ * Get a query parameter value from the current URL, defaulting to a given value
+ * if the query parameter doesn't have a value.
+ * @param {String} parameterName - The query parameter name.
+ * @param {Object} [defaultValue] - An optional default value.
+ * @returns {Object} Returns the query parameter value or the default value.
+ */
+function getQueryParameter(parameterName, defaultValue) {
+  const url = new URL(window.location.href)
+  const parameterValue = url.searchParams.get(parameterName)
+  return parameterValue || defaultValue
+}
+
+/**
+ * Create a div element containing event data.
  * @param {Array[String]} data - Values: [date, title, URL, address, games].
  * @returns {Element} Returns a div element.
  */
 function buildEventElement(data) {
-  // Set up the data
+  // Set up event data values
   requireValue(data, "Data cannot be null or undefined")
   requireValue(data.length >= 4, "Four or more data values must be provided.")
   const dateString = data[0]
@@ -48,8 +62,15 @@ function buildEventElement(data) {
   requireValue(address, "Address (data index 3) cannot be null or undefined")
   requireValue(games, "Games (data index 4) cannot be null or undefined")
   requireValue(address, "Address (data index 3) cannot be null or undefined")
+  const selectedGames = getQueryParameter("games", "").toUpperCase().split(",")
+  const doesEventHaveAnySelectedGames = selectedGames.some(selectedGame => games.includes(selectedGame))
 
-  // Set up the
+  // If this event doesn't include a bracket for any selected games, skip it
+  if (selectedGames.length > 0 && doesEventHaveAnySelectedGames === false) {
+    return null
+  }
+
+  // Set up time related values
   const locale = navigator.languages ? navigator.languages[0] : navigator.language
   const date = new Date(dateString)
   const dayOfWeek = date.toLocaleDateString(locale, { "weekday": "long" }).toUpperCase()
@@ -116,21 +137,35 @@ function buildEventElement(data) {
 }
 
 /**
- * Loads sheet data for upcoming events and appends it to the page.
+ * Load sheet data for upcoming events and append it to the page.
  */
 async function loadEventData() {
   // Fetch data from sheets
   const sheetId = "1AIMZepfkEIUmTYFgFY4t4wTQSXrP_YvETAB-WAwyCyM"
   const apiKey = "AIzaSyDJ-_OQLyugiuK-SOohB9MZ5zd4IoFJhrc"
-  const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values:batchGet?key=${apiKey}&ranges=A:F`
-  const json = await fetchJson(url)
-  const rows = json.valueRanges[0].values.slice(1)
+  const selectedStates = getQueryParameter("states","AZ").split(",")
+  let rows = []
+
+  // Add data for each of the selected states
+  for (const state of selectedStates) {
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values:batchGet?key=${apiKey}&ranges=${state}!A:F`
+    const json = await fetchJson(url)
+
+    // If data was returned, add it to the results
+    if (json.valueRanges) {
+      rows.push(...json.valueRanges[0].values.slice(1))
+    }
+  }
 
   // Append data to the page
   for (const row of rows) {
     console.log("ROW", row)
     const eventElement = buildEventElement(row)
-    document.querySelector("div#event-container").append(eventElement)
+
+    // If an event element was created, append it to the page content
+    if (eventElement) {
+      document.querySelector("div#event-container").append(eventElement)
+    }
   }
 }
 
