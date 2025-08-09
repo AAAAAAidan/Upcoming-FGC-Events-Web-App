@@ -1,8 +1,8 @@
 // TODO
-// 1. Add download button
-// 2. Add game and state filters
+// 1. Add game and state filter selections
+// 2. Add copy link button
 // 3. Add background theme selection
-// 4. Add event edit and removal options
+// 4. Add event edit and removal options (maybe)
 
 /**
  * Require a given value to be defined and not set to falue or an empty string.
@@ -44,6 +44,14 @@ function getQueryParameter(parameterName, defaultValue) {
 }
 
 /**
+ * Download the page content as a JPG file.
+ */
+async function downloadJpg() {
+  const result = await snapdom(document.querySelector("main"), { "scale": 2 })
+  await result.download({ "format": "jpg", "filename": "upcoming-fgc-events" })
+}
+
+/**
  * Create a div element containing event data.
  * @param {Array[String]} data - Values: [date, title, URL, address, games].
  * @returns {Element} Returns a div element.
@@ -63,7 +71,7 @@ function buildEventElement(data) {
   requireValue(games, "Games (data index 4) cannot be null or undefined")
   requireValue(address, "Address (data index 3) cannot be null or undefined")
   const selectedGames = getQueryParameter("games", "").toUpperCase().split(",")
-  const doesEventHaveAnySelectedGames = selectedGames.some(selectedGame => games.includes(selectedGame))
+  const doesEventHaveAnySelectedGames = selectedGames.some(selectedGame => games.includes(selectedGame.trim()))
 
   // If this event doesn't include a bracket for any selected games, skip it
   if (selectedGames.length > 0 && doesEventHaveAnySelectedGames === false) {
@@ -157,7 +165,7 @@ async function loadEventData() {
     }
   }
 
-  // Append data to the page
+  // Append each row's data to the page
   for (const row of rows) {
     console.log("ROW", row)
     const eventElement = buildEventElement(row)
@@ -167,6 +175,14 @@ async function loadEventData() {
       document.querySelector("div#event-container").append(eventElement)
     }
   }
+
+  // TODO
+  // document.querySelector("button#theme-button").addEventListener("click", showThemes)
+  // document.querySelector("button#filter-button").addEventListener("click", showFilters)
+  document.querySelector("button#save-button").addEventListener("click", downloadJpg)
+  // document.querySelector("button#link-button").addEventListener("click", copyLink)
+  // document.querySelector("input#selected-theme").addEventListener("change", applyTheme)
+  // document.querySelector("input#selected-games, input#selected-states").addEventListener("change", applyFilters)
 }
 
 window.addEventListener("load", loadEventData)
