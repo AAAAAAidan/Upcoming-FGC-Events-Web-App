@@ -74,9 +74,9 @@ function applyFilters() {
   const eventDivs = document.querySelectorAll("div.event")
 
   for (const eventDiv of eventDivs) {
-    const eventIsInOneOfTheSelectedCountries = countriesString === "" || countries.includes(eventDiv.country)
-    const eventIsInOneOfTheSelectedStates = statesString === "" || states.includes(eventDiv.state)
-    // Check for a game containing the entered string rather than an exact match
+    // Check for values containing the entered string rather than an exact match
+    const eventIsInOneOfTheSelectedCountries = countriesString === "" || countries.some(country => eventDiv.country.includes(country))
+    const eventIsInOneOfTheSelectedStates = statesString === "" || states.some(state => eventDiv.state.includes(state))
     const eventIncludesOneOfTheSelectedGames = gamesString === "" || games.some(inputGame => eventDiv.games.some(eventGame => eventGame.includes(inputGame)))
 
     // If all of the filters were either unapplied or match the event, show it
