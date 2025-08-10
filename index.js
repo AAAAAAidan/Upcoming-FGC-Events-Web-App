@@ -1,8 +1,7 @@
 // TODO
-// 1. Add game and state filter selections
-// 2. Add copy link button
-// 3. Add background theme selection
-// 4. Add event edit and removal options (maybe)
+// 1. Add background theme selection
+// 2. Add event edit and removal options (maybe)
+// 3. Improve mobile view
 
 /**
  * Require a given value to be defined and not set to falue or an empty string.
@@ -31,13 +30,13 @@ async function fetchJson(url) {
 }
 
 /**
- * Get a query parameter value from the current URL, defaulting to a given value
- * if the query parameter doesn't have a value.
- * @param {String} parameterName - The query parameter name.
+ * Get a search parameter value from the current URL, defaulting to a given
+ * value if the search parameter doesn't have a value.
+ * @param {String} parameterName - The search parameter name.
  * @param {Object} [defaultValue] - An optional default value.
- * @returns {Object} Returns the query parameter value or the default value.
+ * @returns {Object} Returns the value parameter value or the default value.
  */
-function getQueryParameter(parameterName, defaultValue) {
+function getSearchParameter(parameterName, defaultValue) {
   const url = new URL(window.location.href)
   const parameterValue = url.searchParams.get(parameterName)
   return parameterValue || defaultValue
@@ -52,6 +51,55 @@ async function downloadJpg() {
 }
 
 /**
+ * Copy the current URL to the user's clipboard.
+ */
+function copyLink() {
+  navigator.clipboard.writeText(window.location.href)
+  const linkToast = document.querySelector("div#link-toast")
+  bootstrap.Toast.getOrCreateInstance(linkToast, { "delay": 2000 }).show()
+}
+
+/**
+ * Apply the current event filters, hiding and showing applicable events.
+ */
+function applyFilters() {
+  const countriesString = document.querySelector("input#countries-input").value
+  const statesString = document.querySelector("input#states-input").value
+  const gamesString = document.querySelector("input#games-input").value
+  // Return a comma separated string as a array of lowercase trimmed strings
+  const commaSeparatedStringToArray = (commaSeparatedString) => commaSeparatedString.split(",").map(string => string.trim().toLowerCase())
+  const countries = commaSeparatedStringToArray(countriesString)
+  const states = commaSeparatedStringToArray(statesString)
+  const games = commaSeparatedStringToArray(gamesString)
+  const eventDivs = document.querySelectorAll("div.event")
+
+  for (const eventDiv of eventDivs) {
+    const eventIsInOneOfTheSelectedCountries = countriesString === "" || countries.includes(eventDiv.country)
+    const eventIsInOneOfTheSelectedStates = statesString === "" || states.includes(eventDiv.state)
+    // Check for a game containing the entered string rather than an exact match
+    const eventIncludesOneOfTheSelectedGames = gamesString === "" || games.some(inputGame => eventDiv.games.some(eventGame => eventGame.includes(inputGame)))
+
+    // If all of the filters were either unapplied or match the event, show it
+    if (eventIsInOneOfTheSelectedCountries && eventIsInOneOfTheSelectedStates && eventIncludesOneOfTheSelectedGames) {
+      eventDiv.style.display = "inline"
+    } else {
+      eventDiv.style.display = "none"
+    }
+  }
+
+  // Update the search parameters in the URL to match the filters
+  const url = new URL(window.location.href)
+  url.searchParams.set("countries", countries)
+  url.searchParams.set("states", states)
+  url.searchParams.set("games", games)
+  // Delete any empty search parameters
+  url.searchParams.delete("countries", "")
+  url.searchParams.delete("states", "")
+  url.searchParams.delete("games", "")
+  window.history.replaceState({}, document.title, url)
+}
+
+/**
  * Create a div element containing event data.
  * @param {Array[String]} data - Values: [date, title, URL, address, games].
  * @returns {Element} Returns a div element.
@@ -63,20 +111,15 @@ function buildEventElement(data) {
   const dateString = data[0]
   const title = data[1].toUpperCase()
   const url = data[2]
-  const address = data[3].toUpperCase()
-  const games = data[4].toUpperCase()
+  const country = data[3]
+  const state = data[4]
+  const address = data[5].toUpperCase()
+  const gamesString = data[6].toUpperCase()
   requireValue(dateString, "Date (data index 0) cannot be null or undefined")
   requireValue(url, "URL (data index 2) cannot be null or undefined")
   requireValue(address, "Address (data index 3) cannot be null or undefined")
-  requireValue(games, "Games (data index 4) cannot be null or undefined")
+  requireValue(gamesString, "Games (data index 4) cannot be null or undefined")
   requireValue(address, "Address (data index 3) cannot be null or undefined")
-  const selectedGames = getQueryParameter("games", "").toUpperCase().split(",")
-  const doesEventHaveAnySelectedGames = selectedGames.some(selectedGame => games.includes(selectedGame.trim()))
-
-  // If this event doesn't include a bracket for any selected games, skip it
-  if (selectedGames.length > 0 && doesEventHaveAnySelectedGames === false) {
-    return null
-  }
 
   // Set up time related values
   const locale = navigator.languages ? navigator.languages[0] : navigator.language
@@ -91,7 +134,7 @@ function buildEventElement(data) {
   const dayOfMonthHeader = document.createElement("h1")
   dayOfMonthHeader.innerText = dayOfMonth
   dayOfMonthDiv.append(dayOfMonthHeader)
-  dayOfMonthDiv.classList = "col w-auto"
+  dayOfMonthDiv.classList = "col-auto"
 
   // Build the month container
   const monthDiv = document.createElement("div")
@@ -101,7 +144,7 @@ function buildEventElement(data) {
   monthHeader.innerText = month
   monthDiv.append(dayOfWeekHeader)
   monthDiv.append(monthHeader)
-  monthDiv.classList = "col w-auto"
+  monthDiv.classList = "col-auto"
 
   // Build the location container
   const locationDiv = document.createElement("div")
@@ -111,7 +154,7 @@ function buildEventElement(data) {
   addressHeader.innerText = address
   locationDiv.append(timeHeader)
   locationDiv.append(addressHeader)
-  locationDiv.classList = "col w-auto text-body-secondary"
+  locationDiv.classList = "col-auto text-body-secondary"
 
   // Build the title container
   const titleDiv = document.createElement("div")
@@ -122,7 +165,7 @@ function buildEventElement(data) {
   titleAnchor.href = url
   titleAnchor.target = "_blank"
   titleAnchor.innerText = title
-  gamesHeader.innerText = games
+  gamesHeader.innerText = gamesString
   gamesHeader.classList = "text-body-secondary"
   titleHeader.append(titleAnchor)
   titleDiv.append(titleHeader)
@@ -140,7 +183,10 @@ function buildEventElement(data) {
   borderedDiv.classList = "p-2 border rounded bg-body-secondary"
   const eventDiv = document.createElement("div")
   eventDiv.append(borderedDiv)
-  eventDiv.classList = "col-md-6 mb-4"
+  eventDiv.classList = "event col-md-6 mb-4"
+  eventDiv.country = country.toLowerCase()
+  eventDiv.state = state.toLowerCase()
+  eventDiv.games = gamesString.toLowerCase().split(" / ")
   return eventDiv
 }
 
@@ -151,19 +197,9 @@ async function loadEventData() {
   // Fetch data from sheets
   const sheetId = "1AIMZepfkEIUmTYFgFY4t4wTQSXrP_YvETAB-WAwyCyM"
   const apiKey = "AIzaSyDJ-_OQLyugiuK-SOohB9MZ5zd4IoFJhrc"
-  const selectedStates = getQueryParameter("states","AZ").split(",")
-  let rows = []
-
-  // Add data for each of the selected states
-  for (const state of selectedStates) {
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values:batchGet?key=${apiKey}&ranges=${state}!A:F`
-    const json = await fetchJson(url)
-
-    // If data was returned, add it to the results
-    if (json.valueRanges) {
-      rows.push(...json.valueRanges[0].values.slice(1))
-    }
-  }
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values:batchGet?key=${apiKey}&ranges=A:G`
+  const json = await fetchJson(url)
+  const rows = json.valueRanges[0].values.slice(1)
 
   // Append each row's data to the page
   for (const row of rows) {
@@ -176,13 +212,15 @@ async function loadEventData() {
     }
   }
 
-  // TODO
-  // document.querySelector("button#theme-button").addEventListener("click", showThemes)
-  // document.querySelector("button#filter-button").addEventListener("click", showFilters)
+  // Add event listeners
   document.querySelector("button#save-button").addEventListener("click", downloadJpg)
-  // document.querySelector("button#link-button").addEventListener("click", copyLink)
-  // document.querySelector("input#selected-theme").addEventListener("change", applyTheme)
-  // document.querySelector("input#selected-games, input#selected-states").addEventListener("change", applyFilters)
+  document.querySelector("button#share-button").addEventListener("click", copyLink)
+  document.querySelectorAll("input#countries-input, input#states-input, input#games-input").forEach(input => input.addEventListener("keyup", applyFilters))
+  // Update the filters to match the URL search parameters
+  document.querySelector("input#countries-input").value = getSearchParameter("countries", "")
+  document.querySelector("input#states-input").value = getSearchParameter("states", "")
+  document.querySelector("input#games-input").value = getSearchParameter("games", "")
+  applyFilters()
 }
 
 window.addEventListener("load", loadEventData)

@@ -1,6 +1,12 @@
+/* Set a background image in the main event content */
 main {
   background-image: url("./images/Stage_Train_LRG.png");
   background-attachment: fixed;
   background-position: center;
   background-size: cover;
+}
+
+/* Set event boxes to match the height of other event boxes in the same row */
+#event-container > div > div {
+  height: 100%;
 }
