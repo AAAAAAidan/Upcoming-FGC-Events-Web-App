@@ -3,6 +3,9 @@
 // 2. Add event edit and removal options (maybe)
 // 3. Improve mobile view
 
+// Set to true when testing
+const isDevelopmentModeEnabled = false
+
 /**
  * Require a given value to be defined and not set to falue or an empty string.
  * @param {Object} value - The value to be required.
@@ -195,7 +198,7 @@ function buildEventElement(data) {
  */
 async function loadEventData() {
   // Fetch data from sheets
-  const sheetId = "1AIMZepfkEIUmTYFgFY4t4wTQSXrP_YvETAB-WAwyCyM"
+  const sheetId = isDevelopmentModeEnabled ? "1MZfWoS2bUUpnvHfZDCPUc0DnscJSIac7BVQNvSBIEMg" : "1AIMZepfkEIUmTYFgFY4t4wTQSXrP_YvETAB-WAwyCyM"
   const apiKey = "AIzaSyDJ-_OQLyugiuK-SOohB9MZ5zd4IoFJhrc"
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values:batchGet?key=${apiKey}&ranges=A:G`
   const json = await fetchJson(url)
