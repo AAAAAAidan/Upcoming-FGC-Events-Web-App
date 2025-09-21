@@ -164,7 +164,7 @@ function buildEventElement(data) {
   const titleAnchor = document.createElement("a")
   const titleHeader = document.createElement("h3")
   const gamesHeader = document.createElement("h6")
-  titleAnchor.classList = "link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover"
+  titleAnchor.classList = "link-light link-offset-2 link-underline-opacity-0 link-underline-opacity-100-hover"
   titleAnchor.href = url
   titleAnchor.target = "_blank"
   titleAnchor.innerText = title
