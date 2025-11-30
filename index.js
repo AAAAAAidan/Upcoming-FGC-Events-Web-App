@@ -1,7 +1,8 @@
 // TODO
-// 1. Add background theme selection
-// 2. Add event edit and removal options (maybe)
-// 3. Improve mobile view
+// 1. Add excluded games filter
+// 2. Add event edit and removal options
+// 3. Add background theme selection
+// 4. Improve mobile view
 
 // Set to true when testing
 const isDevelopmentModeEnabled = false
@@ -59,7 +60,7 @@ async function downloadJpg() {
 function copyLink() {
   navigator.clipboard.writeText(window.location.href)
   const linkToast = document.querySelector("div#link-toast")
-  bootstrap.Toast.getOrCreateInstance(linkToast, { "delay": 2000 }).show()
+  bootstrap.Toast.getOrCreateInstance(linkToast, { "delay": 1400 }).show()
 }
 
 /**
@@ -112,17 +113,13 @@ function buildEventElement(data) {
   requireValue(data, "Data cannot be null or undefined")
   requireValue(data.length >= 4, "Four or more data values must be provided.")
   const dateString = data[0]
-  const title = data[1].toUpperCase()
+  const title = (data[1] || "").toUpperCase()
   const url = data[2]
   const country = data[3]
   const state = data[4]
-  const address = data[5].toUpperCase()
-  const gamesString = data[6].toUpperCase()
+  const address = (data[5] || "").toUpperCase()
+  const gamesString = (data[6] || "").toUpperCase()
   requireValue(dateString, "Date (data index 0) cannot be null or undefined")
-  requireValue(url, "URL (data index 2) cannot be null or undefined")
-  requireValue(address, "Address (data index 3) cannot be null or undefined")
-  requireValue(gamesString, "Games (data index 4) cannot be null or undefined")
-  requireValue(address, "Address (data index 3) cannot be null or undefined")
 
   // Set up time related values
   const locale = navigator.languages ? navigator.languages[0] : navigator.language
@@ -224,6 +221,8 @@ async function loadEventData() {
   document.querySelector("input#states-input").value = getSearchParameter("states", "")
   document.querySelector("input#games-input").value = getSearchParameter("games", "")
   applyFilters()
+  // Remove the loading icon
+  document.querySelector("div#loading-icon-container").remove()
 }
 
 window.addEventListener("load", loadEventData)
