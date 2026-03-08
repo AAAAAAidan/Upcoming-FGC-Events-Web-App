@@ -1,8 +1,5 @@
 // TODO
-// 1. Add excluded games filter
-// 2. Add event edit and removal options
-// 3. Add background theme selection
-// 4. Improve mobile view
+// Add customization view to add/edit/remove events and modify theme
 
 // Set to true when testing
 const isDevelopmentModeEnabled = false
@@ -50,7 +47,7 @@ function getSearchParameter(parameterName, defaultValue) {
  * Download the page content as a JPG file.
  */
 async function downloadJpg() {
-  const result = await snapdom(document.querySelector("main"), { "scale": 2 })
+  const result = await snapdom(document.querySelector("main"), { "scale": 2, exclude: ['.d-none'] })
   await result.download({ "format": "jpg", "filename": "upcoming-fgc-events" })
 }
 
@@ -85,9 +82,9 @@ function applyFilters() {
 
     // If all of the filters were either unapplied or match the event, show it
     if (eventIsInOneOfTheSelectedCountries && eventIsInOneOfTheSelectedStates && eventIncludesOneOfTheSelectedGames) {
-      eventDiv.style.display = "inline"
+      eventDiv.classList.remove("d-none")
     } else {
-      eventDiv.style.display = "none"
+      eventDiv.classList.add("d-none")
     }
   }
 
