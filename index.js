@@ -21,12 +21,10 @@ function requireValue(value, errorMessage) {
  * @returns {Object} Returns the JSON object.
  */
 async function fetchJson(url) {
-  console.log("GET", url)
   requireValue(url, "URL cannot be null or undefined")
   const response = await fetch(url)
   const json = await response.json()
   requireValue(json, "No data found from URL: " + url)
-  console.log("JSON", json)
   return json
 }
 
@@ -200,7 +198,6 @@ async function loadEventData() {
 
   // Append each row's data to the page
   for (const row of rows) {
-    console.log("ROW", row)
     const eventElement = buildEventElement(row)
 
     // If an event element was created, append it to the page content
