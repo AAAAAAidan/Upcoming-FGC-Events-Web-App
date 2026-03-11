@@ -15,12 +15,11 @@
     <!-- EVENT CONTENT -->
     <main>
       <script>
-        // Set the background as transparent if specified to do so. This is
+        // Set the background if it's not specified as transparent. This is
         // intended for use with iframes and is in HTML for the sake of speed.
-        if (new URL(window.location.href).searchParams.get("background") === "transparent") {
+        if (new URL(window.location.href).searchParams.get("background") !== "transparent") {
           document.querySelectorAll("body, main").forEach(element => {
-            element.style.backgroundColor = "transparent"
-            element.style.backgroundImage = "none"
+            element.style.backgroundImage = "url('./images/Stage_Train_LRG.png')"
           })
         }
       </script>

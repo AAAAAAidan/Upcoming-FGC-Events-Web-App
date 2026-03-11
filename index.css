@@ -1,6 +1,6 @@
 /* Set a background image for the main event content */
 body, main {
-  background-image: url("./images/Stage_Train_LRG.png");
+  background-color: transparent;
   background-attachment: fixed;
   background-position: center;
   background-size: cover;
