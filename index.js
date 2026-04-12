@@ -1,4 +1,5 @@
 // TODO
+// Add exclude games options
 // Add customization view to add/edit/remove events and modify theme
 
 // Set to true when testing
@@ -124,19 +125,12 @@ function buildEventElement(data) {
   const dayOfMonth = date.getDate() < 10 ? "0" + date.getDate() : date.getDate()
   const time = date.toLocaleTimeString(locale, { "hour": "numeric", "minute": "2-digit" })
 
-  // Build the day of month container
-  const dayOfMonthDiv = document.createElement("div")
-  const dayOfMonthHeader = document.createElement("h1")
-  dayOfMonthHeader.innerText = dayOfMonth
-  dayOfMonthDiv.append(dayOfMonthHeader)
-  dayOfMonthDiv.classList = "col-auto"
-
   // Build the month container
   const monthDiv = document.createElement("div")
   const dayOfWeekHeader = document.createElement("h6")
   const monthHeader = document.createElement("h6")
   dayOfWeekHeader.innerText = dayOfWeek
-  monthHeader.innerText = month
+  monthHeader.innerText = `${month} ${dayOfMonth}`
   monthDiv.append(dayOfWeekHeader)
   monthDiv.append(monthHeader)
   monthDiv.classList = "col-auto"
@@ -149,7 +143,7 @@ function buildEventElement(data) {
   addressHeader.innerText = address
   locationDiv.append(timeHeader)
   locationDiv.append(addressHeader)
-  locationDiv.classList = "col-auto text-body-secondary"
+  locationDiv.classList = "col-8 text-body-secondary"
 
   // Build the title container
   const titleDiv = document.createElement("div")
@@ -168,7 +162,6 @@ function buildEventElement(data) {
 
   // Build the overarching containers
   const dateAndLocationDiv = document.createElement("div")
-  dateAndLocationDiv.append(dayOfMonthDiv)
   dateAndLocationDiv.append(monthDiv)
   dateAndLocationDiv.append(locationDiv)
   dateAndLocationDiv.classList = "row row-cols-3"
