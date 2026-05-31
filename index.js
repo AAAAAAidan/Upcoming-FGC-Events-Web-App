@@ -1,7 +1,3 @@
-// TODO
-// Add exclude games options
-// Add customization view to add/edit/remove events and modify theme
-
 // Set to true when testing
 const isDevelopmentModeEnabled = false
 
@@ -66,6 +62,7 @@ function applyFilters() {
   const countriesString = document.querySelector("input#countries-input").value
   const statesString = document.querySelector("input#states-input").value
   const gamesString = document.querySelector("input#games-input").value
+  const operatorString = document.querySelector("fieldset#operator-fieldset input:checked").value
   // Return a comma separated string as a array of lowercase trimmed strings
   const commaSeparatedStringToArray = (commaSeparatedString) => commaSeparatedString.split(",").map(string => string.trim().toLowerCase())
   const countries = commaSeparatedStringToArray(countriesString)
@@ -74,13 +71,24 @@ function applyFilters() {
   const eventDivs = document.querySelectorAll("div.event")
 
   for (const eventDiv of eventDivs) {
-    // Check for values containing the entered string rather than an exact match
-    const eventIsInOneOfTheSelectedCountries = countriesString === "" || countries.some(country => eventDiv.country.includes(country.slice(0, 2)))
-    const eventIsInOneOfTheSelectedStates = statesString === "" || states.some(state => eventDiv.state.includes(state.slice(0, 2)))
-    const eventIncludesOneOfTheSelectedGames = gamesString === "" || games.some(inputGame => eventDiv.games.some(eventGame => eventGame.includes(inputGame)))
+    // True if one of the entered countries matches the event country
+    const eventIsInOneOfTheSelectedCountries = countriesString === ""
+      || countries.some(country => eventDiv.country.includes(country.slice(0, 2)))
+    // True if one of the entered states matches the event state
+    const eventIsInOneOfTheSelectedStates = statesString === ""
+      || states.some(state => eventDiv.state.includes(state.slice(0, 2)))
+    // Filter function that must return true for the game to be included
+    const filterGame = inputGame =>
+      // True if the entered game starts with "-" and does not match every event game
+      (inputGame.startsWith("-") && !eventDiv.games.every(eventGame => eventGame.includes(inputGame.substring(1))))
+      // True if the entered game does not start with "-" and matches an event game
+      || (eventDiv.games.some(eventGame => eventGame.includes(inputGame)))
+    // True if the entered games do not exclude the event games
+    const eventIsNotExcludedByGames = gamesString === ""
+      || (operatorString === "and" ? games.every(filterGame) : games.some(filterGame))
 
     // If all of the filters were either unapplied or match the event, show it
-    if (eventIsInOneOfTheSelectedCountries && eventIsInOneOfTheSelectedStates && eventIncludesOneOfTheSelectedGames) {
+    if (eventIsInOneOfTheSelectedCountries && eventIsInOneOfTheSelectedStates && eventIsNotExcludedByGames) {
       eventDiv.classList.remove("d-none")
     } else {
       eventDiv.classList.add("d-none")
@@ -92,10 +100,13 @@ function applyFilters() {
   url.searchParams.set("countries", countries)
   url.searchParams.set("states", states)
   url.searchParams.set("games", games)
+  url.searchParams.set("operator", operatorString)
   // Delete any empty search parameters
   url.searchParams.delete("countries", "")
   url.searchParams.delete("states", "")
   url.searchParams.delete("games", "")
+  url.searchParams.delete("operator", "")
+  url.searchParams.delete("operator", "or")
   window.history.replaceState({}, document.title, url)
 }
 
@@ -202,11 +213,15 @@ async function loadEventData() {
   // Add event listeners
   document.querySelector("button#save-button").addEventListener("click", downloadJpg)
   document.querySelector("button#share-button").addEventListener("click", copyLink)
-  document.querySelectorAll("input#countries-input, input#states-input, input#games-input").forEach(input => input.addEventListener("keyup", applyFilters))
+  document.querySelectorAll("input#countries-input, input#states-input, input#games-input, fieldset#operator-fieldset input")
+    .forEach(input => input.addEventListener("keyup", applyFilters))
+  document.querySelectorAll("fieldset#operator-fieldset input")
+    .forEach(input => input.addEventListener("click", applyFilters))
   // Update the filters to match the URL search parameters
   document.querySelector("input#countries-input").value = getSearchParameter("countries", "")
   document.querySelector("input#states-input").value = getSearchParameter("states", "")
   document.querySelector("input#games-input").value = getSearchParameter("games", "")
+  document.querySelector("input#operator-and").checked = getSearchParameter("operator", "").toLowerCase() === "and"
   applyFilters()
   // Remove the loading icon
   document.querySelector("div#loading-icon-container").remove()

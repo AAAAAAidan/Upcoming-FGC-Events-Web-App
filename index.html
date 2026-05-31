@@ -75,7 +75,7 @@
                 </span>
               </div>
             </div>
-            <div class="row g-3 align-items-center">
+            <div class="row g-3 mb-2 align-items-center">
               <div class="col-2">
                 <label for="games-input" class="col-form-label">Games</label>
               </div>
@@ -84,10 +84,30 @@
               </div>
               <div class="col">
                 <span id="games-help" class="form-text">
-                  Comma-separated list of game titles.
+                  Comma-separated list of game titles. Start the title with "-" to exclude a game.
                 </span>
               </div>
             </div>
+            <fieldset id="operator-fieldset" class="row g-3 align-items-center">
+              <div class="col-2">
+                <legend for="operator-fieldset" class="col-form-label">Operator</legend>
+              </div>
+              <div class="col ps-3">
+                <div>
+                  <input type="radio" id="operator-or" name="operator" value="or" checked />
+                  <label for="operator-or">OR</label>
+                </div>
+                <div>
+                  <input type="radio" id="operator-and" name="operator" value="and" />
+                  <label for="operator-and">AND</label>
+                </div>
+              </div>
+              <div class="col">
+                <span id="games-help" class="form-text">
+                  The search operator for the games filter.
+                </span>
+              </div>
+            </fieldset>
           </div>
         </div>
       </div>
