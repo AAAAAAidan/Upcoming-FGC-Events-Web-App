@@ -39,11 +39,11 @@ function getSearchParameter(parameterName, defaultValue) {
 }
 
 /**
- * Download the page content as a JPG file.
+ * Download the page content as a PNG file.
  */
-async function downloadJpg() {
+async function downloadPng() {
   const result = await snapdom(document.querySelector("main"), { "scale": 2, exclude: ['.d-none'] })
-  await result.download({ "format": "jpg", "filename": "upcoming-fgc-events" })
+  await result.download({ "format": "png", "filename": "upcoming-fgc-events" })
 }
 
 /**
@@ -211,7 +211,7 @@ async function loadEventData() {
   }
 
   // Add event listeners
-  document.querySelector("button#save-button").addEventListener("click", downloadJpg)
+  document.querySelector("button#save-button").addEventListener("click", downloadPng)
   document.querySelector("button#share-button").addEventListener("click", copyLink)
   document.querySelectorAll("input#countries-input, input#states-input, input#games-input, fieldset#operator-fieldset input")
     .forEach(input => input.addEventListener("keyup", applyFilters))
