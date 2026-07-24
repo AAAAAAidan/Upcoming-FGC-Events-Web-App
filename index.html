@@ -16,10 +16,11 @@
     <main>
       <script>
         // Add the background if not set as transparent. Intended for use with iframes.
-        if (new URL(window.location.href).searchParams.get("background") !== "transparent") {
-          document.querySelectorAll("body, main").forEach(element => {
+        const selectedBackground = new URL(window.location.href).searchParams.get("background")
+        if (selectedBackground !== "transparent") {
+          for (element of document.querySelectorAll("body, main")) {
             element.style.backgroundImage = "url('./images/Stage_Train_LRG.png')"
-          })
+          }
         }
       </script>
       <div class="container pt-4">
@@ -121,13 +122,6 @@
         </div>
       </div>
       <div class="m-3">
-        <button id="theme-button" type="button" class="btn btn-primary m-2 d-none">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-image" viewBox="0 0 16 16">
-            <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"></path>
-            <path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1z"></path>
-          </svg>
-          Theme
-        </button>
         <button id="filter-button" type="button" class="icon-button btn btn-primary m-2 d-none" data-bs-toggle="modal" data-bs-target="#filter-modal">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-funnel" viewBox="0 0 16 16">
             <path d="M1.5 1.5A.5.5 0 0 1 2 1h12a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.128.334L10 8.692V13.5a.5.5 0 0 1-.342.474l-3 1A.5.5 0 0 1 6 14.5V8.692L1.628 3.834A.5.5 0 0 1 1.5 3.5zm1 .5v1.308l4.372 4.858A.5.5 0 0 1 7 8.5v5.306l2-.666V8.5a.5.5 0 0 1 .128-.334L13.5 3.308V2z"></path>
@@ -149,17 +143,14 @@
           Share
         </button>
         <script>
-          // Show icon buttons if not set to be hidden. Intended for use with iframes.
-          switch (new URL(window.location.href).searchParams.get("icons")) {
-            case "none":
-              break
-            case "filter":
-              document.querySelector("button#filter-button").classList.remove("d-none")
-              break
-            default:
-              document.querySelectorAll("button.icon-button").forEach(element => {
-                element.classList.remove("d-none")
-              })
+          // Show icon buttons that aren't set to be hidden. Intended for use with iframes.
+          const selectedIcons = new URL(window.location.href).searchParams.get("icons")
+          for (element of document.querySelectorAll("button.icon-button")) {
+            const elementText = element.innerText.toLowerCase().trim()
+            // If the parameter wasn't provided or includes this icon, show the icon
+            if (selectedIcons === null || selectedIcons.toLowerCase().includes(elementText)) {
+              element.classList.remove("d-none")
+            }
           }
         </script>
       </div>
