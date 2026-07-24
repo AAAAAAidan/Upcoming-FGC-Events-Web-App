@@ -1,5 +1,5 @@
-// Set to true when testing
-const isDevelopmentModeEnabled = false
+// Optionally, set to true when testing
+const useDevelopmentSpreadsheet = false
 
 /**
  * Require a given value to be defined and not set to falue or an empty string.
@@ -42,8 +42,24 @@ function getSearchParameter(parameterName, defaultValue) {
  * Download the page content as a PNG file.
  */
 async function downloadPng() {
-  const result = await snapdom(document.querySelector("main"), { "scale": 2, exclude: ['.d-none'] })
+  const elements = []
+  // Remove hidden event elements from the page. This prevents them from being
+  // read by SnapDOM, which slows performance. Using SnapDOM's "exclude" option
+  // can also prevent this slowness, but causes spacing issues in the export.
+  for (element of document.querySelectorAll("div.event")) {
+    elements.push(element)
+    if (element.classList.contains("d-none")) {
+      element.remove()
+    }
+  }
+  // Create and download a PNG export of the page
+  const result = await snapdom(document.querySelector("main"))
   await result.download({ "format": "png", "filename": "upcoming-fgc-events" })
+  // Remove the remaining visible event elements from the page
+  document.querySelectorAll("div.event").forEach(element => element.remove())
+  // Append all event elements back to the page
+  const container = document.querySelector("div#event-container")
+  elements.forEach(element => container.append(element))
 }
 
 /**
@@ -194,7 +210,7 @@ function buildEventElement(data) {
  */
 async function loadEventData() {
   // Fetch data from sheets
-  const sheetId = isDevelopmentModeEnabled ? "1MZfWoS2bUUpnvHfZDCPUc0DnscJSIac7BVQNvSBIEMg" : "1AIMZepfkEIUmTYFgFY4t4wTQSXrP_YvETAB-WAwyCyM"
+  const sheetId = useDevelopmentSpreadsheet ? "1MZfWoS2bUUpnvHfZDCPUc0DnscJSIac7BVQNvSBIEMg" : "1AIMZepfkEIUmTYFgFY4t4wTQSXrP_YvETAB-WAwyCyM"
   const apiKey = "AIzaSyDJ-_OQLyugiuK-SOohB9MZ5zd4IoFJhrc"
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values:batchGet?key=${apiKey}&ranges=A:G`
   const json = await fetchJson(url)
