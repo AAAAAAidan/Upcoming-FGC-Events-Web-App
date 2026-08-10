@@ -1,6 +1,3 @@
-// Optionally, set to true when testing
-const useDevelopmentSpreadsheet = false
-
 /**
  * Require a given value to be defined and not set to falue or an empty string.
  * @param {Object} value - The value to be required.
@@ -78,9 +75,10 @@ function applyFilters() {
   const countriesString = document.querySelector("input#countries-input").value
   const statesString = document.querySelector("input#states-input").value
   const gamesString = document.querySelector("input#games-input").value
-  const operatorString = document.querySelector("fieldset#operator-fieldset input:checked").value
+
   // Return a comma separated string as a array of lowercase trimmed strings
-  const commaSeparatedStringToArray = (commaSeparatedString) => commaSeparatedString.split(",").map(string => string.trim().toLowerCase())
+  const commaSeparatedStringToArray = (commaSeparatedString) =>
+    commaSeparatedString.split(",").map(string => string.trim().toLowerCase())
   const countries = commaSeparatedStringToArray(countriesString)
   const states = commaSeparatedStringToArray(statesString)
   const games = commaSeparatedStringToArray(gamesString)
@@ -88,23 +86,39 @@ function applyFilters() {
 
   for (const eventDiv of eventDivs) {
     // True if one of the entered countries matches the event country
-    const eventIsInOneOfTheSelectedCountries = countriesString === ""
+    const eventIsInASelectedCountry = countriesString === ""
       || countries.some(country => eventDiv.country.includes(country.slice(0, 2)))
     // True if one of the entered states matches the event state
-    const eventIsInOneOfTheSelectedStates = statesString === ""
+    const eventIsInASelectedState = statesString === ""
       || states.some(state => eventDiv.state.includes(state.slice(0, 2)))
-    // Filter function that must return true for the game to be included
-    const filterGame = inputGame =>
-      // True if the entered game starts with "-" and does not match every event game
-      (inputGame.startsWith("-") && !eventDiv.games.every(eventGame => eventGame.includes(inputGame.substring(1))))
-      // True if the entered game does not start with "-" and matches an event game
-      || (eventDiv.games.some(eventGame => eventGame.includes(inputGame)))
-    // True if the entered games do not exclude the event games
-    const eventIsNotExcludedByGames = gamesString === ""
-      || (operatorString === "and" ? games.every(filterGame) : games.some(filterGame))
 
-    // If all of the filters were either unapplied or match the event, show it
-    if (eventIsInOneOfTheSelectedCountries && eventIsInOneOfTheSelectedStates && eventIsNotExcludedByGames) {
+    const includedGames = []
+    const excludedGames = []
+
+    // For each event game and each input game, add the event game to the
+    // included or excluded list of games if it matches an input game
+    for (let eventGame of eventDiv.games) {
+      for (let inputGame of games) {
+        if (inputGame.startsWith("-") && eventGame.includes(inputGame.substring(1))) {
+          excludedGames.push(eventGame)
+        } else if (eventGame.includes(inputGame)) {
+          includedGames.push(eventGame)
+        }
+      }
+    }
+
+    // True if there are no input games, the event has at least one included
+    // game, or every input game is an exclusion
+    const anyGameIsIncluded = gamesString === ""
+      || includedGames.length > 0
+      || games.every(inputGame => inputGame.startsWith("-"))
+    // True if every game in the event is excluded
+    const everyGameIsExcluded = excludedGames.length !== 0
+      && eventDiv.games.every(eventGame => excludedGames.includes(eventGame))
+
+    // If filters weren't set or the event meets their criteria, show the event
+    if (eventIsInASelectedCountry && eventIsInASelectedState
+        && anyGameIsIncluded && !everyGameIsExcluded) {
       eventDiv.classList.remove("d-none")
     } else {
       eventDiv.classList.add("d-none")
@@ -116,13 +130,10 @@ function applyFilters() {
   url.searchParams.set("countries", countries)
   url.searchParams.set("states", states)
   url.searchParams.set("games", games)
-  url.searchParams.set("operator", operatorString)
   // Delete any empty search parameters
   url.searchParams.delete("countries", "")
   url.searchParams.delete("states", "")
   url.searchParams.delete("games", "")
-  url.searchParams.delete("operator", "")
-  url.searchParams.delete("operator", "or")
   window.history.replaceState({}, document.title, url)
 }
 
@@ -210,7 +221,7 @@ function buildEventElement(data) {
  */
 async function loadEventData() {
   // Fetch data from sheets
-  const sheetId = useDevelopmentSpreadsheet ? "1MZfWoS2bUUpnvHfZDCPUc0DnscJSIac7BVQNvSBIEMg" : "1AIMZepfkEIUmTYFgFY4t4wTQSXrP_YvETAB-WAwyCyM"
+  const sheetId = "1AIMZepfkEIUmTYFgFY4t4wTQSXrP_YvETAB-WAwyCyM"
   const apiKey = "AIzaSyDJ-_OQLyugiuK-SOohB9MZ5zd4IoFJhrc"
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values:batchGet?key=${apiKey}&ranges=A:G`
   const json = await fetchJson(url)
@@ -229,15 +240,12 @@ async function loadEventData() {
   // Add event listeners
   document.querySelector("button#save-button").addEventListener("click", downloadPng)
   document.querySelector("button#share-button").addEventListener("click", copyLink)
-  document.querySelectorAll("input#countries-input, input#states-input, input#games-input, fieldset#operator-fieldset input")
+  document.querySelectorAll("input#countries-input, input#states-input, input#games-input")
     .forEach(input => input.addEventListener("keyup", applyFilters))
-  document.querySelectorAll("fieldset#operator-fieldset input")
-    .forEach(input => input.addEventListener("click", applyFilters))
   // Update the filters to match the URL search parameters
   document.querySelector("input#countries-input").value = getSearchParameter("countries", "")
   document.querySelector("input#states-input").value = getSearchParameter("states", "")
   document.querySelector("input#games-input").value = getSearchParameter("games", "")
-  document.querySelector("input#operator-and").checked = getSearchParameter("operator", "").toLowerCase() === "and"
   applyFilters()
   // Remove the loading icon
   document.querySelector("div#loading-icon-container").remove()
