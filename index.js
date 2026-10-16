@@ -49,9 +49,13 @@ async function downloadPng() {
       element.remove()
     }
   }
+  // Temporarily replace the fixed background-attachment CSS property
+  document.querySelector("main").style.backgroundAttachment = "scroll"
   // Create and download a PNG export of the page
   const result = await snapdom(document.querySelector("main"))
   await result.download({ "format": "png", "filename": "upcoming-fgc-events" })
+  // Restore the fixed background-attachment CSS property
+  document.querySelector("main").style.backgroundAttachment = "fixed"
   // Remove the remaining visible event elements from the page
   document.querySelectorAll("div.event").forEach(element => element.remove())
   // Append all event elements back to the page

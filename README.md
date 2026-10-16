@@ -1,5 +1,5 @@
 # Upcoming FGC Events Web Application
-[fgc-events.info](https://fgc-events.info/) is a small web application that lists upcoming FGC events sourced from a combination of the start.gg API and manually submitted forms. The events are filterable by country, state, and game. The results can be exported as a JPG image.
+[fgc-events.info](https://fgc-events.info/) is a small web application that lists upcoming FGC events sourced from a combination of the start.gg API and manually submitted forms. The events are filterable by country, state, and game. The results can be exported as a PNG image.
 
 ### See Also
 * [Upcoming FGC Events Apps Script](https://github.com/AAAAAAidan/Upcoming-FGC-Events-Apps-Script)
