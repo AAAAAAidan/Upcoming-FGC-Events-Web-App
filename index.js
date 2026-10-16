@@ -146,7 +146,8 @@ function buildEventElement(data) {
   // Set up event data values
   requireValue(data, "Data cannot be null or undefined")
   requireValue(data.length >= 4, "Four or more data values must be provided.")
-  const dateString = data[0]
+  // The Z specifies the time zone as UTC
+  const dateString = data[0] + "Z"
   const title = (data[1] || "").toUpperCase()
   const url = data[2]
   const country = data[3]
@@ -157,6 +158,7 @@ function buildEventElement(data) {
 
   // Set up time related values
   const locale = navigator.languages ? navigator.languages[0] : navigator.language
+  // The date is automatically converted to the browser's time zone
   const date = new Date(dateString)
   const dayOfWeek = date.toLocaleDateString(locale, { "weekday": "long" }).toUpperCase()
   const month = date.toLocaleDateString(locale, { "month": "long" }).toUpperCase()
